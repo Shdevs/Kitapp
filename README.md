@@ -1,95 +1,54 @@
 # Telegram Book Search Bot
 
-Bu proje, Telegram kanallarındaki PDF kitapları otomatik olarak algılayan, kategorilere ayıran ve web sitesinde görüntüleyen bir bot sistemidir.
+This project is a bot system that automatically detects PDF books in Telegram channels, categorizes them and displays them on the website.
 
-## 🚀 Hızlı Başlangıç
+## 🚀 Quick Start
 
-### 1. Kurulum
+### 1. Setup
 ```bash
 npm install
 ```
 
-### 2. Konfigürasyon
-`.env` dosyasını oluşturun:
+### 2. Configuration
+`.env` Create the file:
 ```bash
 cp config.example.env .env
 ```
 
-`.env` dosyasında bot token'ınızı güncelleyin:
+`.env` Update your bot token in the file:
 ```
 BOT_TOKEN=your_bot_token_here
 DB_FILE=books.json
 PORT=3000
 ```
 
-### 3. Çalıştırma
+### 3. Operating
 ```bash
 npm start
 ```
 
-Bu komut hem bot'u hem de web sitesini çalıştırır:
-- **Bot:** Telegram kanallarını dinler ve PDF'leri işler
-- **Web Sitesi:** http://localhost:3000 adresinde çalışır
+This command runs both the bot and the website:
+- **Bot:** listens to Telegram channels and processes PDFs
+- **Website:** runs at http://localhost:3000
 
-## 📚 Özellikler
+## 📚 Features
 
-### Bot Özellikleri
-- ✅ Telegram kanallarındaki PDF'leri otomatik algılama
-- ✅ Kategori sistemi (`#Roman #Azerbaycan` formatında)
-- ✅ PDF içeriğinden kitap başlığı çıkarma
-- ✅ Büyük dosya desteği (50MB+)
-- ✅ Arama sistemi (kitap adı/yazar adı ile)
+### Bot Features
+- ✅ Automatic detection of PDFs in Telegram channels
+- ✅ Category system (in `#Novel #Azerbaijan` format)
+- ✅ Extract book titles from PDF content
+- ✅ Large file support (50MB+)
+- ✅ Search system (by book title/author name)
+### Website Features
+- ✅ Modern, responsive design
+- ✅ Category filtering
+- ✅ Number of books per page selection (10, 50, 100, All)
+- ✅ Pagination system
+- ✅ View and download counter
+- ✅ Direct PDF download
+- ✅ Book details with Modal
 
-### Web Sitesi Özellikleri
-- ✅ Modern, responsive tasarım
-- ✅ Kategori filtreleme
-- ✅ Sayfa başına kitap sayısı seçimi (10, 50, 100, Tümü)
-- ✅ Pagination sistemi
-- ✅ Görüntüleme ve indirme sayacı
-- ✅ Direkt PDF indirme
-- ✅ Modal ile kitap detayları
-
-## 🎯 Kullanım
-
-### Bot'ta Kitap Ekleme
-```
-#Roman
-#Azerbaycan
-Kitap Adı
-Kitap açıklaması...
-```
-
-### Kategori Sistemi
-- `#Roman` - Roman kategorisi
-- `#Azerbaycan` - Azerbaycan kategorisi
-- `#Cinayyet` - Cinayet kategorisi
-- `#English` - İngilizce kategorisi
-
-Aynı satırda birden fazla kategori: `#Roman #Azerbaycan`
-
-### Web Sitesi
-- **Ana Sayfa:** http://localhost:3000
-- **API:** http://localhost:3000/api/books
-- **JSON:** http://localhost:3000/books.json
-
-## 🛠️ Geliştirme
-
-### Sadece Bot
-```bash
-npm run bot
-```
-
-### Sadece Web Sitesi
-```bash
-npm run web
-```
-
-### Geliştirme Modu (Auto-reload)
-```bash
-npm run dev
-```
-
-## 📁 Proje Yapısı
+## 📁 Project Structure
 
 ```
 ├── bot.js              # Telegram bot ana dosyası
@@ -103,16 +62,17 @@ npm run dev
 └── README.md           # Bu dosya
 ```
 
-## 🔧 Teknolojiler
+## 🔧 Technologies
 
 - **Node.js** - Runtime
 - **Telegraf** - Telegram Bot API
-- **Express** - Web sunucusu
-- **pdf-parse** - PDF içerik okuma
-- **fs-extra** - Dosya işlemleri
-- **axios** - HTTP istekleri
-- **concurrently** - Paralel process yönetimi
+- **Express** - Web server
+- **pdf-parse** - PDF content reading
+- **fs-extra** - File operations
+- **axios** - HTTP requests
+- **concurrently** - Parallel process management
 
 ## 📝 Lisans
+
 
 MIT License
