@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "email": "samilhuseynovv@gmail.com",
+      "name": "Samil",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocKQ_frw5EF0TtjO5hJacJYrt0zdyoOWOQnff7UeBkGqHKjLbhaJ=s96-c",
+      "verified": true,
+      "banned": false,
+      "createdAt": "2025-10-29T12:41:57.259Z",
+      "lastLogin": "2025-11-14T20:48:47.617Z"
+    },
+    {
+      "email": "s38447125@gmail.com",
+      "name": "samil",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocLGxjJIdBu5Q_JdQu_ZWvRGygDzvYk8RDaruQ-onFSlVSQNyQ=s96-c",
+      "verified": false,
+      "banned": false,
+      "createdAt": "2025-10-29T13:13:42.208Z",
+      "lastLogin": "2025-10-29T19:43:41.871Z"
+    },
+    {
+      "email": "dayyzaz@gmail.com",
+      "name": "Dayz Az",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocKWooTFMcSr7UP9Djfqy3XzaqCALLqNQNY0x-vS9ecG2XqpnQ=s96-c",
+      "verified": false,
+      "banned": false,
+      "createdAt": "2025-10-29T20:44:44.061Z",
+      "lastLogin": "2025-10-29T20:44:44.061Z"
+    }
+  ]
+}

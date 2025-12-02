@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Booksy</title>
+    <link rel="stylesheet" href="style.css?v=2">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar Toggle Button (Fixed Left) - Only visible when sidebar is closed -->
+    <div class="sidebar-toggle-container" id="sidebarToggleContainer">
+        <button class="sidebar-toggle-fixed" id="sidebarToggleFixed">
+            <i class="fas fa-bars" id="toggleIconFixed"></i>
+        </button>
+        <a href="index.html" class="sidebar-fixed-icon" id="homeIcon" title="Ana Səhifə">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="blog.html" class="sidebar-fixed-icon" id="blogIcon" title="Blog" style="display: none;">
+            <i class="fas fa-blog"></i>
+        </a>
+        <a href="audiobooks.html" class="sidebar-fixed-icon" title="Sesli Kitablar">
+            <i class="fas fa-headphones"></i>
+        </a>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" style="color: #5c977c; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-book"></i>
+                    <span>Booksy</span>
+                </a>
+            </div>
+            
+            <div class="nav-search">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Axtar...">
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <div id="userProfile">
+                    <div class="user-profile" id="userProfileTrigger">
+                        <img id="userAvatar" src="" alt="User" class="user-avatar" style="display: none;">
+                        <span id="userName" class="user-name"></span>
+                        <!-- <i class="fas fa-chevron-down user-dropdown-icon"></i> -->
+                    </div>
+                    <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none;">
+                        <a href="#" class="dropdown-item" onclick="showProfile(); return false;">
+                            <i class="fas fa-user"></i>
+                            <span>Profil</span>
+                        </a>
+                        <a href="#" class="dropdown-item" onclick="logout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Çıxış</span>
+                        </a>
+                    </div>
+                </div>
+                <div id="loginSection">
+                    <button class="google-login-btn" onclick="loginWithGoogle()">
+                        <span>Google</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Header -->
+            <header class="page-header">
+                <h1>Düşüncələrimiz</h1>
+                <p id="rotatingText">Oxu, xəyal et, yarat!</p>
+            </header>
+
+            <!-- Content Layout -->
+            <div class="content-layout">
+                <!-- Sidebar -->
+                <aside class="sidebar" id="sidebar">
+                    <button class="sidebar-toggle-inside" id="sidebarToggleInside">
+                        <i class="fas fa-bars" id="toggleIconInside"></i>
+                    </button>
+                    <div class="sidebar-content" id="sidebarContent">
+                        <h3>İzləmə</h3>
+                        <div class="sidebar-blog-link">
+                            <a href="index.html" class="blog-btn">
+                                <i class="fas fa-home"></i>
+                                <span>Ana Səhifə</span>
+                            </a>
+                        </div>
+                        <div class="sidebar-blog-link">
+                            <a href="audiobooks.html" class="blog-btn">
+                                <i class="fas fa-headphones"></i>
+                                <span>Sesli Kitablar</span>
+                            </a>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="main-area">
+                    <!-- Blog Posts -->
+                    <div class="blog-container" id="blogContainer">
+                        <!-- Posts will be loaded here -->
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div class="loading" id="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Statuslar yüklənir...</p>
+                    </div>
+
+                    <!-- No Results -->
+                    <div class="no-results" id="noResults" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <p>Hələ heç bir status yoxdur</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // HTML escape function
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // Like management
+        function getLikedStatuses() {
+            const liked = localStorage.getItem('likedStatuses');
+            return liked ? JSON.parse(liked) : [];
+        }
+
+        function saveLikedStatuses(liked) {
+            localStorage.setItem('likedStatuses', JSON.stringify(liked));
+        }
+
+        function isStatusLiked(statusId) {
+            const liked = getLikedStatuses();
+            return liked.includes(statusId);
+        }
+
+        function toggleLike(statusId) {
+            const liked = getLikedStatuses();
+            const index = liked.indexOf(statusId);
+            
+            if (index > -1) {
+                liked.splice(index, 1);
+            } else {
+                liked.push(statusId);
+            }
+            
+            saveLikedStatuses(liked);
+            return index === -1; // Returns true if liked, false if unliked
+        }
+
+        function getLikeCount(statusId) {
+            const counts = JSON.parse(localStorage.getItem('statusLikeCounts') || '{}');
+            return counts[statusId] || 0;
+        }
+
+        function updateLikeCount(statusId, increment) {
+            const counts = JSON.parse(localStorage.getItem('statusLikeCounts') || '{}');
+            counts[statusId] = (counts[statusId] || 0) + (increment ? 1 : -1);
+            if (counts[statusId] < 0) counts[statusId] = 0;
+            localStorage.setItem('statusLikeCounts', JSON.stringify(counts));
+            return counts[statusId];
+        }
+
+        function handleLikeClick(statusId, button) {
+            const wasLiked = isStatusLiked(statusId);
+            const nowLiked = toggleLike(statusId);
+            
+            if (nowLiked && !wasLiked) {
+                // Just liked
+                button.classList.add('liked');
+                const count = updateLikeCount(statusId, true);
+                button.innerHTML = `
+                    <i class="fas fa-heart"></i>
+                    <span class="like-count">${count}</span>
+                    <span>Bəyənmə</span>
+                `;
+            } else {
+                // Just unliked
+                button.classList.remove('liked');
+                const count = updateLikeCount(statusId, false);
+                button.innerHTML = `
+                    <i class="far fa-heart"></i>
+                    <span class="like-count">${count}</span>
+                    <span>Bəyən</span>
+                `;
+            }
+            
+            // Re-sort by likes
+            loadStatuses();
+        }
+
+        async function loadStatuses(scrollToTop = false) {
+            try {
+                const loading = document.getElementById('loading');
+                const container = document.getElementById('blogContainer');
+                
+                // Show loading if container is empty
+                if (container && container.children.length === 0) {
+                    loading.style.display = 'flex';
+                }
+                
+                // Get current user info
+                let currentUser = null;
+                try {
+                    const authResponse = await fetch('/api/auth/user', {
+                        credentials: 'include'
+                    });
+                    const authData = await authResponse.json();
+                    currentUser = authData.user;
+                } catch (e) {
+                    console.log('Could not get user info:', e);
+                }
+                
+                // Add timestamp to bust cache
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/api/statuses?t=${timestamp}`, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                console.log('Statuses received from server:', data.statuses?.length || 0);
+                if (data.statuses && data.statuses.length > 0) {
+                    console.log('First status ID:', data.statuses[0].id);
+                    console.log('First status author:', data.statuses[0].author);
+                }
+                
+                const noResults = document.getElementById('noResults');
+                
+                loading.style.display = 'none';
+                
+                if (!data.statuses || data.statuses.length === 0) {
+                    noResults.style.display = 'flex';
+                    container.innerHTML = '';
+                    return;
+                }
+                
+                noResults.style.display = 'none';
+                
+                // Sort by like count (descending), then by date (descending)
+                const sortedStatuses = [...data.statuses].sort((a, b) => {
+                    const countA = getLikeCount(a.id);
+                    const countB = getLikeCount(b.id);
+                    if (countB !== countA) {
+                        return countB - countA;
+                    }
+                    return new Date(b.date) - new Date(a.date);
+                });
+                
+                console.log('Sorted statuses:', sortedStatuses.length);
+                
+                // Helper function to check if user owns status/comment
+                function isOwner(author) {
+                    if (!currentUser) return false;
+                    return author === currentUser.name || author === currentUser.email;
+                }
+                
+                container.innerHTML = sortedStatuses.map(status => {
+                    const dateObj = new Date(status.date);
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    const hours = String(dateObj.getHours()).padStart(2, '0');
+                    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+                    const date = `${month}/${day}/${year} ${hours}:${minutes}`;
+                    
+                    // Escape HTML and convert line breaks to <br>
+                    const escapedText = escapeHtml(status.text);
+                    const fullText = escapedText.replace(/\n/g, '<br>');
+                    
+                    // Estimate if text is longer than 4 lines (rough estimate: ~50 chars per line)
+                    const textLength = escapedText.length;
+                    const estimatedLines = Math.ceil(textLength / 50);
+                    const isLongText = estimatedLines > 4 || escapedText.split('\n').length > 4;
+                    
+                    const isLiked = isStatusLiked(status.id);
+                    const likeCount = getLikeCount(status.id);
+                    
+                    const commentCount = (status.comments && status.comments.length) || 0;
+                    const authorName = escapeHtml(status.author || 'İstifadəçi');
+                    
+                    const authorImage = status.authorImage || '';
+                    const avatarHTML = authorImage 
+                        ? `<img src="${escapeHtml(authorImage)}" alt="${authorName}" class="author-avatar-img" onerror="this.onerror=null; this.style.display='none';">`
+                        : '';
+                    const fallbackIcon = '<i class="fas fa-user"></i>';
+                    
+                    return `
+                        <div class="blog-post modern-card" data-status-id="${status.id}">
+                            <div class="blog-header">
+                                <div class="blog-author">
+                                    <div class="author-avatar">
+                                        ${avatarHTML}
+                                        ${fallbackIcon}
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">
+                                            ${authorName}
+                                            ${status.authorVerified ? '<i class="fas fa-check-circle verified-icon" title="Təsdiqlənmiş hesab"></i>' : ''}
+                                        </span>
+                                        <span class="blog-date">${date}</span>
+                                        ${status.isQuote && status.bookData ? `
+                                            <span class="quote-book-title-only clickable" onclick="showBookPopup('${status.bookData.id}')">${status.bookData.title}</span>
+                                        ` : ''}
+                                    </div>
+                                    ${isOwner(status.author) ? `
+                                    <button class="delete-status-btn" onclick="deleteStatus('${status.id}')" title="Statusu sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="blog-content-wrapper">
+                                <div class="blog-content ${isLongText ? '' : 'expanded'}" id="content-${status.id}">${fullText}</div>
+                                ${isLongText ? `
+                                <button class="expand-content-btn" onclick="toggleContent('${status.id}', this)" data-full-text="${fullText.replace(/"/g, '&quot;')}">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                ` : ''}
+                            </div>
+                            <div class="blog-footer">
+                                <div class="blog-stats">
+                                    <button class="action-btn like-button ${isLiked ? 'liked' : ''}" onclick="handleLikeClick('${status.id}', this)">
+                                        <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                                        <span class="like-count">${likeCount}</span>
+                                    </button>
+                                    <button class="action-btn comment-btn" onclick="toggleComments('${status.id}')">
+                                        <i class="far fa-comment"></i>
+                                        <span class="comment-count">${commentCount}</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="comments-section" id="comments-${status.id}" style="display: none;">
+                                <div class="comments-list" id="comments-list-${status.id}">
+                                    ${commentCount > 0 ? '<div class="comments-loading">Şərhlər yüklənir...</div>' : '<div class="no-comments">Hələ şərh yoxdur</div>'}
+                                </div>
+                                <div class="comment-form">
+                                    <div class="comment-input-wrapper">
+                                        <input type="text" 
+                                               class="comment-input" 
+                                               id="comment-input-${status.id}" 
+                                               placeholder="Şərh yazın..." 
+                                               onkeypress="handleCommentKeyPress(event, '${status.id}')">
+                                        <button class="comment-submit-btn" onclick="postComment('${status.id}')">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                console.log('HTML generated, container elements:', container.children.length);
+                
+                // Setup avatar error handlers after rendering statuses
+                setTimeout(setupAvatarErrorHandlers, 100);
+                
+                // Scroll to top if requested (e.g., after posting new status)
+                if (scrollToTop && container && container.children.length > 0) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 100);
+                }
+                
+                console.log('Statuses loaded and rendered:', sortedStatuses.length);
+            } catch (error) {
+                console.error('Error loading statuses:', error);
+                const loading = document.getElementById('loading');
+                const noResults = document.getElementById('noResults');
+                if (loading) loading.style.display = 'none';
+                if (noResults) noResults.style.display = 'flex';
+            }
+        }
+
+        // Comments functionality
+        async function loadComments(statusId) {
+            try {
+                // Get current user info
+                let currentUser = null;
+                try {
+                    const authResponse = await fetch('/api/auth/user', {
+                        credentials: 'include'
+                    });
+                    const authData = await authResponse.json();
+                    currentUser = authData.user;
+                } catch (e) {
+                    console.log('Could not get user info:', e);
+                }
+                
+                // Helper function to check if user owns comment
+                function isCommentOwner(author) {
+                    if (!currentUser) return false;
+                    return author === currentUser.name || author === currentUser.email;
+                }
+                
+                const response = await fetch(`/api/statuses/${statusId}/comments`);
+                const data = await response.json();
+                const commentsList = document.getElementById(`comments-list-${statusId}`);
+                
+                if (!commentsList) return;
+                
+                if (!data.comments || data.comments.length === 0) {
+                    commentsList.innerHTML = '<div class="no-comments">Hələ şərh yoxdur</div>';
+                    return;
+                }
+                
+                commentsList.innerHTML = data.comments.map(comment => {
+                    const commentDateObj = new Date(comment.date);
+                    const commentMonth = String(commentDateObj.getMonth() + 1).padStart(2, '0');
+                    const commentDay = String(commentDateObj.getDate()).padStart(2, '0');
+                    const commentYear = commentDateObj.getFullYear();
+                    const commentHours = String(commentDateObj.getHours()).padStart(2, '0');
+                    const commentMinutes = String(commentDateObj.getMinutes()).padStart(2, '0');
+                    const commentDate = `${commentMonth}/${commentDay}/${commentYear} ${commentHours}:${commentMinutes}`;
+                    
+                    const commentAuthorImage = comment.authorImage || '';
+                    const commentAuthorName = escapeHtml(comment.author || 'İstifadəçi');
+                    const commentAvatarHTML = commentAuthorImage 
+                        ? `<img src="${escapeHtml(commentAuthorImage)}" alt="${commentAuthorName}" class="comment-author-avatar-img" onerror="this.onerror=null; this.style.display='none';">`
+                        : '';
+                    const commentFallbackIcon = '<i class="fas fa-user"></i>';
+                    
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-author-avatar">
+                                ${commentAvatarHTML}
+                                ${commentFallbackIcon}
+                            </div>
+                            <div class="comment-content-wrapper">
+                                <div class="comment-header">
+                                    <span class="comment-author">
+                                        ${commentAuthorName}
+                                        ${comment.authorVerified ? '<i class="fas fa-check-circle verified-icon" title="Təsdiqlənmiş hesab"></i>' : ''}
+                                    </span>
+                                    <span class="comment-date">${commentDate}</span>
+                                    ${isCommentOwner(comment.author) ? `
+                                    <button class="delete-comment-btn" onclick="deleteComment('${statusId}', '${comment.id}')" title="Şərhi sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    ` : ''}
+                                </div>
+                                <div class="comment-text">${escapeHtml(comment.text).replace(/\n/g, '<br>')}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Setup avatar error handlers after rendering comments
+                setTimeout(setupAvatarErrorHandlers, 100);
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                const commentsList = document.getElementById(`comments-list-${statusId}`);
+                if (commentsList) {
+                    commentsList.innerHTML = '<div class="comment-error">Şərhlər yüklənə bilmədi</div>';
+                }
+            }
+        }
+
+        function toggleComments(statusId) {
+            const commentsSection = document.getElementById(`comments-${statusId}`);
+            if (!commentsSection) return;
+            
+            const isVisible = commentsSection.style.display !== 'none';
+            
+            if (isVisible) {
+                commentsSection.style.display = 'none';
+            } else {
+                commentsSection.style.display = 'block';
+                loadComments(statusId);
+            }
+        }
+
+        function handleCommentKeyPress(event, statusId) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                postComment(statusId);
+            }
+        }
+
+        async function postComment(statusId) {
+            // Check if user is logged in
+            const authResponse = await fetch('/api/auth/user', {
+                credentials: 'include'
+            });
+            const authData = await authResponse.json();
+            
+            if (!authData.user) {
+                showNotification('Şərh yazmaq üçün daxil olmalısınız', 'error');
+                return;
+            }
+
+            const commentInput = document.getElementById(`comment-input-${statusId}`);
+            const text = commentInput.value.trim();
+            
+            if (!text) {
+                showNotification('Şərh mətnini daxil edin', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/statuses/${statusId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    commentInput.value = '';
+                    loadComments(statusId);
+                    loadStatuses(); // Reload to update comment count
+                    showNotification('Şərh uğurla əlavə edildi', 'success');
+                } else {
+                    showNotification(data.error || 'Şərh əlavə edilərkən xəta baş verdi', 'error');
+                }
+            } catch (error) {
+                console.error('Error posting comment:', error);
+                showNotification('Şərh əlavə edilərkən xəta baş verdi', 'error');
+            }
+        }
+
+        // Confirmation modal functions
+        let confirmCallback = null;
+
+        function showConfirmModal(title, message, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            confirmCallback = onConfirm;
+            
+            // Remove existing listener
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            const newConfirmBtn = document.getElementById('confirmDeleteBtn');
+            
+            // Add new listener
+            newConfirmBtn.addEventListener('click', function() {
+                if (confirmCallback) {
+                    confirmCallback();
+                    closeConfirmModal();
+                }
+            });
+            
+            modal.classList.add('show');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
+            confirmCallback = null;
+        }
+
+        // Delete status function
+        async function deleteStatus(statusId) {
+            showConfirmModal(
+                'Statusu sil',
+                'Bu statusu silmək istədiyinizə əminsiniz?',
+                async () => {
+                    try {
+                        const response = await fetch(`/api/statuses/${statusId}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            showNotification('Status uğurla silindi', 'success');
+                            loadStatuses(); // Reload statuses
+                        } else {
+                            showNotification(data.error || 'Status silinərkən xəta baş verdi', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting status:', error);
+                        showNotification('Status silinərkən xəta baş verdi', 'error');
+                    }
+                }
+            );
+        }
+
+        // Delete comment function
+        async function deleteComment(statusId, commentId) {
+            showConfirmModal(
+                'Şərhi sil',
+                'Bu şərhi silmək istədiyinizə əminsiniz?',
+                async () => {
+                    try {
+                        const response = await fetch(`/api/statuses/${statusId}/comments/${commentId}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            showNotification('Şərh uğurla silindi', 'success');
+                            loadComments(statusId); // Reload comments
+                            loadStatuses(); // Reload to update comment count
+                        } else {
+                            showNotification(data.error || 'Şərh silinərkən xəta baş verdi', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting comment:', error);
+                        showNotification('Şərh silinərkən xəta baş verdi', 'error');
+                    }
+                }
+            );
+        }
+
+        // Toggle content expand/collapse
+        function toggleContent(statusId, button) {
+            const contentDiv = document.getElementById(`content-${statusId}`);
+            const isExpanded = button.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse - limit to 4 lines
+                contentDiv.classList.remove('expanded');
+                button.classList.remove('expanded');
+            } else {
+                // Expand - show full text
+                contentDiv.classList.add('expanded');
+                button.classList.add('expanded');
+            }
+        }
+
+        // Make functions globally available
+        window.handleLikeClick = handleLikeClick;
+        window.toggleComments = toggleComments;
+        window.handleCommentKeyPress = handleCommentKeyPress;
+        window.postComment = postComment;
+        window.deleteStatus = deleteStatus;
+        window.deleteComment = deleteComment;
+        window.toggleContent = toggleContent;
+
+        // Setup avatar image error handlers
+        function setupAvatarErrorHandlers() {
+            document.querySelectorAll('.author-avatar-img, .comment-author-avatar-img').forEach(img => {
+                img.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    const icon = this.nextElementSibling;
+                    if (icon && icon.tagName === 'I') {
+                        icon.style.display = 'flex';
+                    }
+                });
+                
+                // If image loads successfully, hide icon
+                img.addEventListener('load', function() {
+                    const icon = this.nextElementSibling;
+                    if (icon && icon.tagName === 'I') {
+                        icon.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Load statuses on page load
+        loadStatuses();
+        
+        // Setup avatar handlers after statuses load
+        setTimeout(setupAvatarErrorHandlers, 500);
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const posts = document.querySelectorAll('.blog-post');
+            
+            posts.forEach(post => {
+                const content = post.querySelector('.blog-content').textContent.toLowerCase();
+                if (content.includes(query)) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        });
+
+        // Post Status Modal Functions
+        function openPostStatusModal() {
+            // Check if user is logged in
+            fetch('/api/auth/user', {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.user) {
+                    showNotification('Status paylaşmaq üçün daxil olmalısınız', 'error');
+                    return;
+                }
+                
+                const modal = document.getElementById('postStatusModal');
+                const form = document.getElementById('postStatusForm');
+                
+                if (!modal || !form) {
+                    console.error('Modal or form not found');
+                    return;
+                }
+                
+                // Remove existing listener and add new one
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                
+                // Setup form submission
+                const postStatusForm = document.getElementById('postStatusForm');
+                if (postStatusForm) {
+                    console.log('Form found, setting up submit handler');
+                    postStatusForm.addEventListener('submit', handleStatusSubmit);
+                }
+                
+                modal.classList.add('show');
+                
+                // Show the book search group initially
+                const bookSearchGroup = document.getElementById('bookSearchGroup');
+                if (bookSearchGroup) {
+                    bookSearchGroup.classList.remove('hidden');
+                    bookSearchGroup.style.display = 'block';
+                }
+                
+                const statusText = document.getElementById('statusText');
+                if (statusText) {
+                    statusText.focus();
+                }
+                
+                // Reset submit button state when opening modal
+                const submitBtn = postStatusForm.querySelector('.btn-publish');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Paylaş</span>';
+                }
+                
+                // Re-setup quote toggle when modal opens (elements are now in DOM)
+                setTimeout(() => {
+                    setupQuoteToggle();
+                    setupBookSearch();
+                    
+                    // Setup character count for the new textarea
+                    const statusText = document.getElementById('statusText');
+                    if (statusText) {
+                        statusText.addEventListener('input', updateCharCount);
+                        statusText.addEventListener('keydown', function(e) {
+                            // Prevent typing if max chars reached
+                            if (this.value.length >= MAX_CHARS && !e.ctrlKey && !e.metaKey && 
+                                !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Backspace'].includes(e.key)) {
+                                e.preventDefault();
+                            }
+                        });
+                        // Update count initially
+                        updateCharCount();
+                    }
+                }, 100);
+            })
+            .catch(error => {
+                console.error('Auth check error:', error);
+                showNotification('Status paylaşmaq üçün daxil olmalısınız', 'error');
+            });
+        }
+
+        function closePostStatusModal() {
+            const modal = document.getElementById('postStatusModal');
+            modal.classList.remove('show');
+            const statusText = document.getElementById('statusText');
+            if (statusText) {
+                statusText.value = '';
+                statusText.disabled = false;
+                statusText.placeholder = 'Nə düşünürsünüz?';
+                updateCharCount(); // Reset character count
+            }
+            
+            // Reset quote toggle and clear selected book
+            const quoteToggle = document.getElementById('isQuoteToggle');
+            const bookSearchGroup = document.getElementById('bookSearchGroup');
+            if (quoteToggle) {
+                quoteToggle.checked = false;
+            }
+            if (bookSearchGroup) {
+                bookSearchGroup.classList.add('hidden');
+                bookSearchGroup.style.display = 'none';
+                
+                // Reset book search section visibility
+                const bookSearchSection = bookSearchGroup.querySelector('.book-search-section');
+                if (bookSearchSection) {
+                    bookSearchSection.style.display = 'none';
+                }
+            }
+            clearSelectedBook();
+            
+            // Reset submit button state
+            const form = document.getElementById('postStatusForm');
+            if (form) {
+                const submitBtn = form.querySelector('.btn-publish');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Paylaş</span>';
+                }
+            }
+        }
+
+        // Character count functionality
+        const MAX_CHARS = 2000;
+
+        function updateCharCount() {
+            const statusText = document.getElementById('statusText');
+            const charCount = document.getElementById('charCount');
+            
+            if (!statusText || !charCount) return;
+            
+            const length = statusText.value.length;
+            charCount.textContent = `${length} / ${MAX_CHARS}`;
+            
+            // Remove all classes first
+            charCount.classList.remove('warning', 'error');
+            
+            if (length > MAX_CHARS) {
+                charCount.classList.add('error');
+            } else if (length > MAX_CHARS * 0.8) {
+                charCount.classList.add('warning');
+            }
+        }
+
+        // Setup character count and form submission when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusText = document.getElementById('statusText');
+            if (statusText) {
+                statusText.addEventListener('input', updateCharCount);
+                statusText.addEventListener('keydown', function(e) {
+                    // Prevent typing if max chars reached
+                    if (this.value.length >= MAX_CHARS && !e.ctrlKey && !e.metaKey && 
+                        !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Backspace'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // Setup quote toggle functionality
+            setupQuoteToggle();
+            
+            // Setup book search functionality
+            setupBookSearch();
+            
+            // Setup form submission
+            const postStatusForm = document.getElementById('postStatusForm');
+            if (postStatusForm) {
+                console.log('Form found, setting up submit handler');
+                postStatusForm.addEventListener('submit', handleStatusSubmit);
+            } else {
+                console.error('Form not found!');
+            }
+        });
+
+        // Handle form submission
+        async function handleStatusSubmit(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Form submitted!');
+            
+            const statusText = document.getElementById('statusText');
+            if (!statusText) {
+                console.error('statusText element not found');
+                showNotification('Form elementi tapılmadı', 'error');
+                return;
+            }
+            
+            const text = statusText.value.trim();
+            const isQuote = document.getElementById('isQuoteToggle').checked;
+            const selectedBook = window.selectedBookData;
+            
+            if (!text) {
+                showNotification('Status mətnini daxil edin', 'error');
+                return;
+            }
+
+            if (text.length > MAX_CHARS) {
+                showNotification(`Status mətni ${MAX_CHARS} simvoldan uzun ola bilməz`, 'error');
+                return;
+            }
+
+            // Check if quote is selected but no book is chosen
+            if (isQuote && !selectedBook) {
+                showNotification('Alıntı paylaşmaq üçün kitab seçməlisiniz', 'error');
+                return;
+            }
+
+            // Find submit button
+            const form = e.target;
+            const submitBtn = form.querySelector('.btn-publish');
+            if (!submitBtn) {
+                console.error('Submit button not found');
+                showNotification('Göndərmə düyməsi tapılmadı', 'error');
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Göndərilir...</span>';
+
+            try {
+                console.log('Posting status:', text);
+                console.log('Request payload:', JSON.stringify({ text }));
+                
+                const response = await fetch('/api/statuses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        text: text,
+                        isQuote: isQuote,
+                        bookData: selectedBook ? {
+                            id: selectedBook.id,
+                            title: selectedBook.title,
+                            author: selectedBook.author,
+                            cover: selectedBook.cover
+                        } : null
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        errorData = { error: errorText || 'Unknown error' };
+                    }
+                    throw new Error(errorData.error || errorData.details || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Status posted successfully:', data);
+                console.log('Response data:', JSON.stringify(data, null, 2));
+
+                if (data.success) {
+                    console.log('Status posted, reloading...');
+                    
+                    // Reset button state BEFORE closing modal
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Paylaş</span>';
+                    
+                    // Clear form
+                    statusText.value = '';
+                    updateCharCount();
+                    
+                    // Close modal
+                    closePostStatusModal();
+                    
+                    // Small delay to ensure server has written the file
+                    setTimeout(async () => {
+                        console.log('Reloading statuses...');
+                        await loadStatuses(true);
+                        showNotification('Status uğurla paylaşıldı', 'success');
+                    }, 500);
+                } else {
+                    showNotification(data.error || 'Status paylaşılarkən xəta baş verdi', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Paylaş</span>';
+                }
+            } catch (error) {
+                console.error('Error posting status:', error);
+                showNotification(error.message || 'Status paylaşılarkən xəta baş verdi', 'error');
+                
+                // Reset button state on error
+                const form = document.getElementById('postStatusForm');
+                if (form) {
+                    const submitBtn = form.querySelector('.btn-publish');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Paylaş</span>';
+                    }
+                }
+            }
+        }
+
+        // Make functions globally available
+        window.openPostStatusModal = openPostStatusModal;
+        window.closePostStatusModal = closePostStatusModal;
+
+        // Close modal on outside click
+        const postStatusModal = document.getElementById('postStatusModal');
+        if (postStatusModal) {
+            postStatusModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePostStatusModal();
+                }
+            });
+        }
+
+        // Close confirmation modal on outside click
+        const confirmModal = document.getElementById('confirmModal');
+        if (confirmModal) {
+            confirmModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeConfirmModal();
+                }
+            });
+        }
+
+        // Quote toggle functionality
+        function setupQuoteToggle() {
+            const quoteToggle = document.getElementById('isQuoteToggle');
+            const bookSearchGroup = document.getElementById('bookSearchGroup');
+            
+            console.log('Setting up quote toggle...');
+            console.log('Quote toggle element:', quoteToggle);
+            console.log('Book search group element:', bookSearchGroup);
+            
+            if (!quoteToggle || !bookSearchGroup) {
+                console.error('Quote toggle or book search group not found');
+                console.error('Quote toggle:', quoteToggle);
+                console.error('Book search group:', bookSearchGroup);
+                return;
+            }
+            
+            // Initial setup - always show the toggle, hide book search initially
+            bookSearchGroup.classList.remove('hidden');
+            bookSearchGroup.style.display = 'block';
+            
+            // Hide book search section initially
+            const bookSearchSection = bookSearchGroup.querySelector('.book-search-section');
+            if (bookSearchSection) {
+                bookSearchSection.style.display = 'none';
+            }
+            
+            // Enable textarea always - users can write without quote toggle
+            const statusText = document.getElementById('statusText');
+            if (statusText) {
+                statusText.disabled = false;
+                statusText.placeholder = 'Nə düşünürsünüz?';
+            }
+            
+            quoteToggle.addEventListener('change', function() {
+                console.log('Quote toggle changed:', this.checked);
+                const statusText = document.getElementById('statusText');
+                
+                if (this.checked) {
+                    // Show only the book search section, keep toggle visible
+                    const bookSearchSection = bookSearchGroup.querySelector('.book-search-section');
+                    if (bookSearchSection) {
+                        bookSearchSection.style.display = 'block';
+                    }
+                    
+                    // Keep textarea enabled for quotes
+                    if (statusText) {
+                        statusText.disabled = false;
+                        statusText.placeholder = 'Alıntınızı yazın...';
+                    }
+                    
+                    console.log('Book search section shown');
+                    
+                    // Focus on search input
+                    setTimeout(() => {
+                        const bookSearchInput = document.getElementById('bookSearchInput');
+                        if (bookSearchInput) {
+                            bookSearchInput.focus();
+                        }
+                    }, 100);
+                } else {
+                    // Hide only the book search section, keep toggle visible
+                    const bookSearchSection = bookSearchGroup.querySelector('.book-search-section');
+                    if (bookSearchSection) {
+                        bookSearchSection.style.display = 'none';
+                    }
+                    
+                    // Keep textarea enabled always
+                    if (statusText) {
+                        statusText.disabled = false;
+                        statusText.placeholder = 'Nə düşünürsünüz?';
+                    }
+                    
+                    console.log('Book search section hidden');
+                    // Clear selected book when toggling off
+                    clearSelectedBook();
+                }
+            });
+        }
+
+        // Global books array
+        let allBooks = [];
+        let currentBookData = null;
+
+        // Book popup functions
+        window.showBookPopup = function(bookId) {
+            console.log('showBookPopup called with bookId:', bookId);
+            console.log('allBooks length:', allBooks.length);
+            console.log('allBooks sample:', allBooks.slice(0, 2));
+            
+            const book = allBooks.find(b => (b.id === bookId) || (b.fileId === bookId));
+            if (!book) {
+                console.log('Book not found with id:', bookId);
+                console.log('Available book IDs:', allBooks.map(b => ({ id: b.id, fileId: b.fileId, title: b.title })));
+                showNotification('Kitab tapılmadı', 'error');
+                return;
+            }
+            
+            console.log('Found book:', book);
+
+            currentBookData = {
+                ...book,
+                fileUrl: book.fileUrl,
+                filename: book.filename,
+                fileId: book.fileId || book.id
+            };
+            
+            console.log('Current book data set:', currentBookData);
+            
+            // Get views and downloads from localStorage (using script.js format)
+            const fileId = book.id || book.fileId;
+            const savedViewCounts = localStorage.getItem('bookViewCounts');
+            const savedDownloadCounts = localStorage.getItem('bookDownloadCounts');
+            
+            let viewCounts = {};
+            let downloadCounts = {};
+            
+            if (savedViewCounts) {
+                viewCounts = JSON.parse(savedViewCounts);
+            }
+            if (savedDownloadCounts) {
+                downloadCounts = JSON.parse(savedDownloadCounts);
+            }
+            
+            const views = viewCounts[fileId] || '0';
+            const downloads = downloadCounts[fileId] || '0';
+
+            // Extract author from title (format: "Author - Title")
+            let author = 'Müəllif məlumatı yoxdur';
+            if (book.title && book.title.includes(' - ')) {
+                author = book.title.split(' - ')[0];
+            }
+
+            // Get categories
+            let category = 'Kategoriya yoxdur';
+            if (book.categories && book.categories.length > 0) {
+                category = book.categories.join(', ');
+            }
+
+            // Populate popup with book data
+            document.getElementById('bookPopupCover').src = book.imageUrl || book.cover || '/images/default-book.png';
+            document.getElementById('bookPopupTitle').textContent = book.title;
+            document.getElementById('bookPopupAuthor').textContent = author;
+            document.getElementById('bookPopupCategory').textContent = category;
+            document.getElementById('bookPopupViews').textContent = views;
+            document.getElementById('bookPopupDownloads').textContent = downloads;
+            
+            // Store filename for download
+            currentBookData.filename = book.filename;
+
+            // Show popup
+            document.getElementById('bookPopup').classList.add('show');
+            
+            // Setup button event listeners after popup is shown
+            setTimeout(() => {
+                const readBtn = document.getElementById('readBookBtn');
+                const downloadBtn = document.getElementById('downloadBookBtn');
+                
+                console.log('Setting up buttons:', { 
+                    readBtn: !!readBtn, 
+                    downloadBtn: !!downloadBtn,
+                    readBtnElement: readBtn,
+                    downloadBtnElement: downloadBtn
+                });
+                
+                if (downloadBtn) {
+                    // Use both onclick and event listener to ensure it works
+                    downloadBtn.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('=== DOWNLOAD BUTTON CLICKED ===');
+                        console.log('currentBookData:', currentBookData);
+                        if (window.downloadBook) {
+                            window.downloadBook();
+                        } else {
+                            console.error('window.downloadBook is not defined!');
+                        }
+                        return false;
+                    };
+                    console.log('Download button onclick handler added');
+                } else {
+                    console.error('Download button not found in DOM!');
+                    console.log('Popup element:', document.getElementById('bookPopup'));
+                }
+                
+                if (readBtn) {
+                    readBtn.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Read button clicked');
+                        if (window.readBook) {
+                            window.readBook();
+                        }
+                        return false;
+                    };
+                    console.log('Read button onclick handler added');
+                } else {
+                    console.error('Read button not found in DOM!');
+                }
+            }, 200);
+        }
+
+        window.closeBookPopup = function() {
+            document.getElementById('bookPopup').classList.remove('show');
+            currentBookData = null;
+        }
+
+        window.readBook = function() {
+            console.log('readBook called, currentBookData:', currentBookData);
+            if (currentBookData) {
+                // Get the file URL
+                const pdfUrl = currentBookData.fileUrl;
+                console.log('PDF URL:', pdfUrl);
+                
+                if (pdfUrl) {
+                    // Open PDF in new tab
+                    const fullUrl = window.location.origin + pdfUrl;
+                    console.log('Opening PDF:', fullUrl);
+                    window.open(fullUrl, '_blank');
+                    
+                    // Increment view count
+                    const fileId = currentBookData.id || currentBookData.fileId;
+                    incrementViewCount(fileId);
+                    showNotification('PDF açılır...', 'success');
+                } else {
+                    console.log('PDF URL not found in currentBookData');
+                    console.log('Available properties:', Object.keys(currentBookData));
+                    showNotification('PDF faylı tapılmadı', 'error');
+                }
+            } else {
+                console.log('No currentBookData');
+                showNotification('Kitab məlumatı tapılmadı', 'error');
+            }
+        }
+
+        // Simple download function that always works (same as main page)
+        function downloadBookNow() {
+            console.log('=== SIMPLE DOWNLOAD CALLED ===');
+            console.log('currentBookData:', currentBookData);
+            
+            if (!currentBookData || !currentBookData.fileId) {
+                alert('Kitab məlumatı tapılmadı!');
+                return;
+            }
+            
+            const fileId = currentBookData.fileId;
+            const filename = currentBookData.filename || currentBookData.title + '.pdf';
+            
+            console.log('Downloading fileId:', fileId);
+            console.log('Filename:', filename);
+            
+            try {
+                // Use same method as main page - proxy endpoint
+                const proxyUrl = `/api/download/${fileId}`;
+                
+                // Create download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = proxyUrl;
+                downloadLink.download = filename;
+                downloadLink.target = '_blank';
+                downloadLink.style.display = 'none';
+                
+                // Add to DOM temporarily
+                document.body.appendChild(downloadLink);
+                
+                // Trigger download
+                downloadLink.click();
+                
+                // Remove from DOM
+                document.body.removeChild(downloadLink);
+                
+                // Show success message
+                if (typeof showNotification === 'function') {
+                    showNotification(`"${filename}" yüklənir...`, 'success');
+                } else {
+                    alert(`"${filename}" yüklənir...`);
+                }
+                
+                console.log('Download completed');
+                
+            } catch (error) {
+                console.error('Error downloading PDF:', error);
+                alert('PDF yüklənə bilmədi: ' + error.message);
+            }
+        }
+        
+        // Make it global
+        window.downloadBookNow = downloadBookNow;
+        
+        // Go to book function - redirect to main page and highlight book
+        function goToBook() {
+            console.log('=== GO TO BOOK CALLED ===');
+            console.log('currentBookData:', currentBookData);
+            
+            if (!currentBookData || !currentBookData.fileId) {
+                alert('Kitab məlumatı tapılmadı!');
+                return;
+            }
+            
+            const fileId = currentBookData.fileId;
+            const bookTitle = currentBookData.title;
+            
+            console.log('Going to book:', bookTitle, 'fileId:', fileId);
+            
+            // Store book ID for highlighting
+            localStorage.setItem('highlightBookId', fileId);
+            
+            // Redirect to main page
+            window.location.href = '/';
+            
+            // Show notification
+            if (typeof showNotification === 'function') {
+                showNotification('Ana səhifəyə yönləndirilir...', 'success');
+            } else {
+                alert('Ana səhifəyə yönləndirilir...');
+            }
+        }
+        
+        // Make it global
+        window.goToBook = goToBook;
+        
+        // Simple read function
+        function readBookNow() {
+            console.log('=== SIMPLE READ CALLED ===');
+            console.log('currentBookData:', currentBookData);
+            
+            if (!currentBookData || !currentBookData.fileUrl) {
+                alert('Kitab məlumatı tapılmadı!');
+                return;
+            }
+            
+            const pdfUrl = currentBookData.fileUrl;
+            const fullUrl = window.location.origin + pdfUrl;
+            
+            console.log('Opening PDF:', fullUrl);
+            
+            try {
+                // Method 1: Direct window.open
+                const newWindow = window.open(fullUrl, '_blank', 'noopener,noreferrer');
+                
+                if (newWindow) {
+                    console.log('PDF opened in new window');
+                    // Show success message
+                    if (typeof showNotification === 'function') {
+                        showNotification('PDF açılır...', 'success');
+                    } else {
+                        alert('PDF açılır...');
+                    }
+                } else {
+                    // Method 2: Create link and click
+                    console.log('Popup blocked, trying link method...');
+                    const link = document.createElement('a');
+                    link.href = fullUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    console.log('PDF opened via link click');
+                    
+                    // Show success message
+                    if (typeof showNotification === 'function') {
+                        showNotification('PDF açılır...', 'success');
+                    } else {
+                        alert('PDF açılır...');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error opening PDF:', error);
+                alert('PDF açıla bilmədi: ' + error.message);
+            }
+        }
+        
+        // Make it global
+        window.readBookNow = readBookNow;
+
+        window.downloadBook = function() {
+            console.log('=== DOWNLOAD FUNCTION CALLED ===');
+            console.log('Time:', new Date().toISOString());
+            console.log('downloadBook called, currentBookData:', currentBookData);
+            console.log('window.downloadBook exists:', typeof window.downloadBook === 'function');
+            console.trace('Call stack:');
+            
+            if (!currentBookData) {
+                console.log('ERROR: No currentBookData');
+                showNotification('Kitab məlumatı tapılmadı', 'error');
+                return;
+            }
+            
+            // Get the file URL
+            const pdfUrl = currentBookData.fileUrl;
+            console.log('PDF URL:', pdfUrl);
+            
+            if (!pdfUrl) {
+                console.log('ERROR: PDF URL not found');
+                console.log('Available properties:', Object.keys(currentBookData));
+                showNotification('PDF faylı tapılmadı', 'error');
+                return;
+            }
+            
+            // Get filename
+            let filename = currentBookData.filename || currentBookData.title;
+            
+            // Extract filename from URL if not available
+            if (!filename || filename === currentBookData.title) {
+                const urlParts = pdfUrl.split('/');
+                const urlFilename = urlParts[urlParts.length - 1];
+                if (urlFilename && urlFilename.includes('.')) {
+                    filename = urlFilename;
+                } else {
+                    filename = currentBookData.title + '.pdf';
+                }
+            }
+            
+            // Clean filename for download
+            filename = filename.replace(/[^\w\s.-]/g, '_');
+            
+            const fullUrl = window.location.origin + pdfUrl;
+            console.log('Downloading file:', filename);
+            console.log('Full URL:', fullUrl);
+            
+            try {
+                // Use fetch API to download the file
+                console.log('Fetching file from:', fullUrl);
+                
+                fetch(fullUrl)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('Fayl tapılmadı: ' + response.status);
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        console.log('File blob received, size:', blob.size);
+                        
+                        // Create object URL
+                        const url = window.URL.createObjectURL(blob);
+                        
+                        // Create download link
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        
+                        console.log('Link created, triggering click...');
+                        
+                        // Trigger download
+                        link.click();
+                        
+                        console.log('Download triggered successfully');
+                        
+                        // Clean up
+                        setTimeout(() => {
+                            window.URL.revokeObjectURL(url);
+                            if (document.body.contains(link)) {
+                                document.body.removeChild(link);
+                            }
+                        }, 1000);
+                        
+                        // Increment download count
+                        const fileId = currentBookData.id || currentBookData.fileId;
+                        incrementDownloadCount(fileId);
+                        
+                        showNotification(`"${filename}" yüklənir...`, 'success');
+                    })
+                    .catch(error => {
+                        console.error('Download error:', error);
+                        showNotification('Yükləmə xətası: ' + error.message, 'error');
+                    });
+                
+            } catch (error) {
+                console.error('Download setup error:', error);
+                showNotification('Yükləmə xətası: ' + error.message, 'error');
+            }
+        };
+
+        // Helper functions for view/download counts (from script.js)
+        function incrementViewCount(fileId) {
+            const savedViewCounts = localStorage.getItem('bookViewCounts');
+            let viewCounts = {};
+            if (savedViewCounts) {
+                viewCounts = JSON.parse(savedViewCounts);
+            }
+            if (!viewCounts[fileId]) {
+                viewCounts[fileId] = 0;
+            }
+            viewCounts[fileId]++;
+            localStorage.setItem('bookViewCounts', JSON.stringify(viewCounts));
+        }
+
+        function incrementDownloadCount(fileId) {
+            const savedDownloadCounts = localStorage.getItem('bookDownloadCounts');
+            let downloadCounts = {};
+            if (savedDownloadCounts) {
+                downloadCounts = JSON.parse(savedDownloadCounts);
+            }
+            if (!downloadCounts[fileId]) {
+                downloadCounts[fileId] = 0;
+            }
+            downloadCounts[fileId]++;
+            localStorage.setItem('bookDownloadCounts', JSON.stringify(downloadCounts));
+        }
+
+        // Book search functionality
+        function setupBookSearch() {
+            const bookSearchInput = document.getElementById('bookSearchInput');
+            const bookSearchResults = document.getElementById('bookSearchResults');
+            const selectedBook = document.getElementById('selectedBook');
+            const removeBookBtn = document.getElementById('removeBookBtn');
+            
+            if (!bookSearchInput || !bookSearchResults || !selectedBook) {
+                console.log('Book search elements not found');
+                return;
+            }
+
+            let searchTimeout;
+
+            // Load books data
+            loadBooksData();
+
+            bookSearchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    bookSearchResults.style.display = 'none';
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    searchBooks(query);
+                }, 300);
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.book-search-container')) {
+                    bookSearchResults.style.display = 'none';
+                }
+            });
+
+            if (removeBookBtn) {
+                removeBookBtn.addEventListener('click', clearSelectedBook);
+            }
+        }
+
+        async function loadBooksData() {
+            try {
+                console.log('Loading books data...');
+                const response = await fetch('/api/books');
+                if (response.ok) {
+                    const data = await response.json();
+                    allBooks = data.books || [];
+                    console.log('Loaded books:', allBooks.length);
+                    console.log('Sample book:', allBooks[0]);
+                } else {
+                    console.error('Failed to load books:', response.status);
+                }
+            } catch (error) {
+                console.error('Error loading books:', error);
+            }
+        }
+        
+        // Make loadBooksData global
+        window.loadBooksData = loadBooksData;
+
+        function searchBooks(query) {
+            if (!allBooks || allBooks.length === 0) {
+                console.log('No books available');
+                return;
+            }
+
+            const results = allBooks.filter(book => 
+                book.title.toLowerCase().includes(query.toLowerCase()) ||
+                (book.author && book.author.toLowerCase().includes(query.toLowerCase()))
+            ).slice(0, 5); // Limit to 5 results
+
+            const bookSearchResults = document.getElementById('bookSearchResults');
+            if (!bookSearchResults) return;
+
+            if (results.length === 0) {
+                bookSearchResults.innerHTML = '<div class="book-search-result">Kitab tapılmadı</div>';
+            } else {
+                bookSearchResults.innerHTML = results.map(book => `
+                    <div class="book-search-result" onclick="selectBook('${book.id || book.fileId}')">
+                        <img src="${book.imageUrl || book.cover || '/images/default-book.png'}" alt="${book.title}">
+                        <div class="book-search-result-info">
+                            <div class="book-search-result-title">${book.title}</div>
+                            <div class="book-search-result-author">${book.author || 'Müəllif məlumatı yoxdur'}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            bookSearchResults.style.display = 'block';
+        }
+
+        function selectBook(bookId) {
+            const book = allBooks.find(b => (b.id === bookId) || (b.fileId === bookId));
+            if (!book) {
+                console.log('Book not found with id:', bookId);
+                return;
+            }
+
+            // Hide search results
+            const bookSearchResults = document.getElementById('bookSearchResults');
+            if (bookSearchResults) {
+                bookSearchResults.style.display = 'none';
+            }
+
+            // Clear search input
+            const bookSearchInput = document.getElementById('bookSearchInput');
+            if (bookSearchInput) {
+                bookSearchInput.value = '';
+            }
+
+            // Show selected book
+            const selectedBookEl = document.getElementById('selectedBook');
+            const selectedBookCover = document.getElementById('selectedBookCover');
+            const selectedBookTitle = document.getElementById('selectedBookTitle');
+            const selectedBookAuthor = document.getElementById('selectedBookAuthor');
+
+            if (selectedBookEl && selectedBookCover && selectedBookTitle && selectedBookAuthor) {
+                selectedBookCover.src = book.imageUrl || book.cover || '/images/default-book.png';
+                selectedBookTitle.textContent = book.title;
+                selectedBookAuthor.textContent = book.author || '';
+                selectedBookEl.style.display = 'block';
+            }
+
+            // Store selected book data
+            window.selectedBookData = {
+                id: book.id || book.fileId,
+                title: book.title,
+                author: book.author || '',
+                cover: book.imageUrl || book.cover || '/images/default-book.png'
+            };
+        }
+
+        function clearSelectedBook() {
+            const selectedBook = document.getElementById('selectedBook');
+            const bookSearchInput = document.getElementById('bookSearchInput');
+            const bookSearchResults = document.getElementById('bookSearchResults');
+
+            if (selectedBook) selectedBook.style.display = 'none';
+            if (bookSearchInput) bookSearchInput.value = '';
+            if (bookSearchResults) bookSearchResults.style.display = 'none';
+
+            window.selectedBookData = null;
+        }
+
+        // Make functions globally available
+        window.closeConfirmModal = closeConfirmModal;
+        window.selectBook = selectBook;
+        window.clearSelectedBook = clearSelectedBook;
+        window.setupQuoteToggle = setupQuoteToggle;
+        window.setupBookSearch = setupBookSearch;
+    </script>
+    <script src="script.js"></script>
+    <script>
+        // Setup sidebar toggle for blog page
+        // Global event delegation for download button (works even if button is dynamically created)
+        document.addEventListener('click', function(e) {
+            // Check if clicked element is the download button or its child
+            const downloadBtn = e.target.closest('#downloadBookBtn');
+            if (downloadBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('=== DOWNLOAD BUTTON CLICKED (via delegation) ===');
+                console.log('currentBookData:', currentBookData);
+                if (window.downloadBook) {
+                    window.downloadBook();
+                } else {
+                    console.error('window.downloadBook is not defined!');
+                }
+                return false;
+            }
+            
+            // Check if clicked element is the read button
+            const readBtn = e.target.closest('#readBookBtn');
+            if (readBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Read button clicked (via delegation)');
+                if (window.readBook) {
+                    window.readBook();
+                }
+                return false;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load books data on page load
+            if (typeof loadBooksData === 'function') {
+                loadBooksData();
+            }
+            
+            // Call the main setupSidebarToggle function
+            if (typeof setupSidebarToggle === 'function') {
+                setupSidebarToggle();
+            }
+            const sidebarToggleFixed = document.getElementById('sidebarToggleFixed');
+            const sidebarToggleInside = document.getElementById('sidebarToggleInside');
+            const sidebar = document.getElementById('sidebar');
+            const toggleIconFixed = document.getElementById('toggleIconFixed');
+            const toggleIconInside = document.getElementById('toggleIconInside');
+            const homeIcon = document.getElementById('homeIcon');
+            const blogIcon = document.getElementById('blogIcon');
+            
+            // Open/Close sidebar function
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.remove('open');
+                    document.body.classList.remove('sidebar-container-open');
+                    if (toggleIconFixed) {
+                        toggleIconFixed.classList.remove('fa-times');
+                        toggleIconFixed.classList.add('fa-bars');
+                    }
+                    if (toggleIconInside) {
+                        toggleIconInside.classList.remove('fa-times');
+                        toggleIconInside.classList.add('fa-bars');
+                    }
+                    // Show home icon, hide blog icon when closed
+                    if (homeIcon) homeIcon.style.display = 'flex';
+                    if (blogIcon) blogIcon.style.display = 'none';
+                } else {
+                    // Open
+                    sidebar.classList.add('open');
+                    document.body.classList.add('sidebar-container-open');
+                    if (toggleIconFixed) {
+                        toggleIconFixed.classList.remove('fa-bars');
+                        toggleIconFixed.classList.add('fa-times');
+                    }
+                    if (toggleIconInside) {
+                        toggleIconInside.classList.remove('fa-bars');
+                        toggleIconInside.classList.add('fa-times');
+                    }
+                    // Hide home icon, show blog icon when open
+                    if (homeIcon) homeIcon.style.display = 'none';
+                    if (blogIcon) blogIcon.style.display = 'flex';
+                }
+            }
+            
+            // Open sidebar from fixed button
+            if (sidebarToggleFixed) {
+                sidebarToggleFixed.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
+            
+            // Toggle sidebar from inside button
+            if (sidebarToggleInside) {
+                sidebarToggleInside.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
+            
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    document.body.classList.remove('sidebar-container-open');
+                    if (toggleIconFixed) {
+                        toggleIconFixed.classList.remove('fa-times');
+                        toggleIconFixed.classList.add('fa-bars');
+                    }
+                    if (toggleIconInside) {
+                        toggleIconInside.classList.remove('fa-times');
+                        toggleIconInside.classList.add('fa-bars');
+                    }
+                    // Show home icon, hide blog icon when closed
+                    if (homeIcon) homeIcon.style.display = 'flex';
+                    if (blogIcon) blogIcon.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    
+    <!-- Floating Action Button for Post Status -->
+    <button class="fab-button" id="fabButton" onclick="openPostStatusModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Post Status Modal -->
+    <div class="modal" id="postStatusModal">
+        <div class="modal-content post-status-modal">
+            <div class="modal-header modern-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-feather-alt"></i>
+                    </div>
+                    <div class="header-text">
+                        <h2>Yeni Status</h2>
+                        <p>Fikirlərinizi paylaşın</p>
+                    </div>
+                </div>
+                <button class="close-btn modern-close" onclick="closePostStatusModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="postStatusForm">
+                <!-- Quote Toggle and Book Search -->
+                <div class="form-group modern-form-group" id="bookSearchGroup">
+                    <div class="quote-book-search-container">
+                        <div class="quote-toggle-container-small">
+                            <label class="quote-toggle-label-small">
+                                <span class="toggle-text-small">Alıntı</span>
+                                <div class="quote-toggle-small">
+                                    <input type="checkbox" id="isQuoteToggle" class="quote-toggle-input-small">
+                                    <span class="quote-toggle-slider-small"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="book-search-section">
+                            <label class="form-label-small">Kitab seçin</label>
+                            <div class="book-search-container">
+                                <input type="text" id="bookSearchInput" class="book-search-input" placeholder="Kitab adını yazın...">
+                                <div class="book-search-results" id="bookSearchResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="selected-book-small" id="selectedBook" style="display: none;">
+                        <div class="selected-book-info-small">
+                            <img class="selected-book-cover-small" id="selectedBookCover" src="" alt="">
+                            <div class="selected-book-details-small">
+                                <div class="selected-book-title-small" id="selectedBookTitle"></div>
+                                <div class="selected-book-author-small" id="selectedBookAuthor"></div>
+                            </div>
+                            <button type="button" class="remove-book-btn-small" id="removeBookBtn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group modern-form-group">
+                    <div class="textarea-wrapper">
+                        <textarea id="statusText" rows="8" placeholder="Nə düşünürsünüz?" maxlength="2000" required></textarea>
+                        <div class="textarea-footer">
+                            <span class="char-count" id="charCount">0 / 2000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions modern-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closePostStatusModal()">
+                        <i class="fas fa-times"></i>
+                        <span>Ləğv et</span>
+                    </button>
+                    <button type="submit" class="btn btn-publish">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Paylaş</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content confirm-modal">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 id="confirmTitle">Təsdiq tələb olunur</h3>
+            </div>
+            <div class="confirm-body">
+                <p id="confirmMessage">Bu əməliyyatı həyata keçirmək istədiyinizə əminsiniz?</p>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn btn-cancel-confirm" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                    <span>Ləğv et</span>
+                </button>
+                <button class="btn btn-confirm-delete" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i>
+                    <span>Sil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Details Popup -->
+    <div id="bookPopup" class="modal">
+        <div class="modal-content book-popup-content">
+            <div class="modal-header">
+                <h3>Kitab Məlumatları</h3>
+                <button class="close-btn" onclick="closeBookPopup()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body book-popup-body">
+                <div class="book-popup-left">
+                    <img id="bookPopupCover" src="" alt="Kitab kapağı" class="book-popup-cover">
+                </div>
+                <div class="book-popup-right">
+                    <h4 id="bookPopupTitle" class="book-popup-title"></h4>
+                    <div class="book-popup-details">
+                        <div class="book-detail-item">
+                            <span class="book-detail-label">Müəllif:</span>
+                            <span id="bookPopupAuthor" class="book-detail-value"></span>
+                        </div>
+                        <div class="book-detail-item">
+                            <span class="book-detail-label">Kategoriya:</span>
+                            <span id="bookPopupCategory" class="book-detail-value"></span>
+                        </div>
+                        <div class="book-detail-item">
+                            <span class="book-detail-label">Baxış sayı:</span>
+                            <span id="bookPopupViews" class="book-detail-value"></span>
+                        </div>
+                        <div class="book-detail-item">
+                            <span class="book-detail-label">Yükləmə sayı:</span>
+                            <span id="bookPopupDownloads" class="book-detail-value"></span>
+                        </div>
+                    </div>
+                    <div class="book-popup-actions">
+                        <button class="btn btn-primary" id="readBookBtn" onclick="readBookNow()">
+                            <i class="fas fa-eye"></i> PDF Aç
+                        </button>
+                        <button class="btn btn-secondary" id="goToBookBtn" onclick="goToBook()">
+                            <i class="fas fa-external-link-alt"></i> Kitaba Get
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 KitApp | Müəllif hüquqları qorunur.</p>
+                <a href="https://t.me/your_channel" target="_blank" class="telegram-link-footer">
+                    <i class="fab fa-telegram"></i>
+                    Telegram
+                </a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
+

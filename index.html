@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booksy</title>
+    <link rel="stylesheet" href="style.css?v=2">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar Toggle Button (Fixed Left) - Only visible when sidebar is closed -->
+    <div class="sidebar-toggle-container" id="sidebarToggleContainer">
+        <button class="sidebar-toggle-fixed" id="sidebarToggleFixed">
+            <i class="fas fa-bars" id="toggleIconFixed"></i>
+        </button>
+        <a href="blog.html" class="sidebar-fixed-icon" title="Blog">
+            <i class="fas fa-blog"></i>
+        </a>
+        <a href="audiobooks.html" class="sidebar-fixed-icon" title="Sesli Kitablar">
+            <i class="fas fa-headphones"></i>
+        </a>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" style="color: #5c977c; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-book"></i>
+                    <span>Booksy</span>
+                </a>
+            </div>
+            
+            <div class="nav-search">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Axtar...">
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <div id="userProfile">
+                    <div class="user-profile" id="userProfileTrigger">
+                        <img id="userAvatar" src="" alt="User" class="user-avatar" style="display: none;">
+                        <span id="userName" class="user-name"></span>
+                        <!-- <i class="fas fa-chevron-down user-dropdown-icon"></i> -->
+                    </div>
+                    <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none;">
+                        <a href="#" class="dropdown-item" onclick="showProfile(); return false;">
+                            <i class="fas fa-user"></i>
+                            <span>Profil</span>
+                        </a>
+                        <a href="#" class="dropdown-item" onclick="logout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Çıxış</span>
+                        </a>
+                    </div>
+                </div>
+                <div id="loginSection">
+                    <button class="google-login-btn" onclick="loginWithGoogle()">
+                        <span>Google</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Header -->
+            <header class="page-header">
+                <h1>Rəflərimiz</h1>
+                <p id="rotatingText">“Bir kitabla başla, bir dünyanı kəşf et.”</p>
+            </header>
+
+            <!-- Content Layout -->
+            <div class="content-layout">
+                <!-- Sidebar -->
+                <aside class="sidebar" id="sidebar">
+                    <button class="sidebar-toggle-inside" id="sidebarToggleInside">
+                        <i class="fas fa-bars" id="toggleIconInside"></i>
+                    </button>
+                    <div class="sidebar-content" id="sidebarContent">
+                        <h3>İzləmə</h3>
+                        <div class="items-per-page">
+                            <label for="itemsPerPage">Səhifə başına:</label>
+                            <select id="itemsPerPage">
+                                <option value="10">10</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">Tümü</option>
+                            </select>
+                        </div>
+
+                        <div class="category-filter">
+                            <label for="categoryFilter">Kateqoriya:</label>
+                            <select id="categoryFilter">
+                                <option value="all">Hamısı</option>
+                                <option value="user-read">Oxudum</option>
+                                <option value="user-will-read">Oxuyacam</option>
+                                <!-- Categories will be populated dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="user-categories-section">
+                            <h4>Mənim Kitablarım</h4>
+                            <div class="category-slider-container">
+                                <div class="category-slider-labels">
+                                    <span class="slider-label">Oxudum</span>
+                                    <span class="slider-label center">Hamısı</span>
+                                    <span class="slider-label">Oxuyacam</span>
+                                </div>
+                                <div class="category-slider-track">
+                                    <input type="range" 
+                                           id="categorySlider" 
+                                           min="0" 
+                                           max="2" 
+                                           value="1" 
+                                           step="1"
+                                           class="category-slider-input">
+                                    <div class="category-slider-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-stats">
+                            <h4>Statistika</h4>
+                            <div class="stat-item">
+                                <span class="stat-label">Ümumi kitablar:</span>
+                                <span class="stat-value" id="totalBooks">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Göstərildi:</span>
+                                <span class="stat-value" id="showingBooks">0</span>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-blog-link">
+                            <a href="blog.html" class="blog-btn">
+                                <i class="fas fa-blog"></i>
+                                <span>Blog</span>
+                            </a>
+                        </div>
+                        <div class="sidebar-blog-link">
+                            <a href="audiobooks.html" class="blog-btn">
+                                <i class="fas fa-headphones"></i>
+                                <span>Sesli Kitablar</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-icons-fixed">
+                        <a href="blog.html" class="sidebar-fixed-icon" title="Blog">
+                            <i class="fas fa-blog"></i>
+                        </a>
+                        <a href="audiobooks.html" class="sidebar-fixed-icon" title="Sesli Kitablar">
+                            <i class="fas fa-headphones"></i>
+                        </a>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="main-area">
+                    <!-- Books Grid -->
+                    <div class="books-grid" id="booksGrid">
+                        <!-- Books will be loaded here -->
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div class="loading" id="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Kitablar yüklənir...</p>
+                    </div>
+
+                    <!-- No Results -->
+                    <div class="no-results" id="noResults" style="display: none;">
+                        <i class="fas fa-search"></i>
+                        <h3>Axtarış nəticə vermədi</h3>
+                        <p>Fərqli kitab axtara bilərsiniz</p>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="pagination" style="display: none;">
+                        <button class="pagination-btn" id="prevBtn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                            Əvvəkli
+                        </button>
+                        
+                        <div class="pagination-numbers" id="paginationNumbers">
+                            <!-- Page numbers will be generated here -->
+                        </div>
+                        
+                        <button class="pagination-btn" id="nextBtn" disabled>
+                            Sonrakı
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Book Info Modal -->
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="book-info">
+                    <!-- <div class="book-cover">
+                        <i class="fas fa-book"></i>
+                    </div> -->
+                    <div class="book-details">
+                        <p id="modalDescription"></p>
+                        <div class="book-meta">
+                            <span class="book-date" id="modalDate"></span>
+                            <span class="book-size" id="modalSize"></span>
+                            <span class="book-category" id="modalCategory"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="closeModalBtn">Bağla</button>
+                <button class="btn btn-success" id="readBtn">
+                    <i class="fas fa-book-open"></i>
+                    Oxu
+                </button>
+                <button class="btn btn-primary" id="downloadBtn">
+                    <i class="fas fa-download"></i>
+                    Yuklə
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 KitApp | Müəllif hüquqları qorunur.</p>
+                <a href="https://t.me/your_channel" target="_blank" class="telegram-link-footer">
+                    <i class="fab fa-telegram"></i>
+                    Telegram
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

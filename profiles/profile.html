@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - Booksy</title>
+    <link rel="stylesheet" href="../style.css?v=2">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-header {
+            background: #e0e7dd;
+            border-radius: 20px;
+            padding: 40px 45px;
+            color: #5c977c;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: visible;
+            transition: all 0.3s ease;
+            border: 1px solid #d4e4d4;
+        }
+
+        .profile-header:hover {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #e8f5e8;
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #f8fff8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #2e7d32;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .profile-avatar-large:hover {
+            transform: scale(1.05);
+            border-color: #2e7d32;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-avatar-large:hover img {
+            transform: scale(1.1);
+        }
+
+        .profile-details {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .profile-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: #5c977c;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-email {
+            font-size: 1rem;
+            color: #5c977c;
+            margin: 0 0 25px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-email::before {
+            content: '\f0e0';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 400;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .stat-item-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 1rem;
+            color: #5c977c;
+        }
+
+        .stat-item-inline .stat-label {
+            color: #5c977c;
+            font-weight: 500;
+        }
+
+        .stat-item-inline .stat-value {
+            color: #5c977c;
+            font-weight: 700;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .profile-section {
+            background: #e0e7dd;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #d4e4d4;
+            transition: all 0.3s ease;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .profile-section:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .profile-section:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #e8f5e8;
+            position: relative;
+        }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #eaf0e9, #d4e4d4);
+            border-radius: 3px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            color: #5c977c;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .section-header i {
+            font-size: 1.75rem;
+            color: #5c977c;
+            padding: 10px;
+            background: rgba(92, 151, 124, 0.15);
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover i {
+            background: rgba(92, 151, 124, 0.25);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            opacity: 0.4;
+            color: #2e7d32;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            margin: 0;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Profile blog cards styling */
+        .profile-section .blog-post.modern-card {
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-section .blog-post.modern-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Comment cards styling */
+        .profile-section .comment-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            border-radius: 16px;
+            border: 1px solid #e8e8e8;
+            transition: all 0.3s ease;
+        }
+
+        .profile-section .comment-item:hover {
+            border-color: #2e7d32;
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.1);
+            transform: translateX(5px);
+        }
+
+        .profile-section .comment-item .comment-header {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .profile-section .comment-item .comment-text {
+            color: #5c977c;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .profile-section .comment-item a {
+            color: #5c977c;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-section .comment-item a:hover {
+            color: #5c977c;
+            gap: 10px;
+        }
+
+        .profile-section .comment-item a i {
+            transition: transform 0.3s ease;
+        }
+
+        .profile-section .comment-item a:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Verified icon styling */
+        .profile-section .verified-icon {
+            color: #1DA1F2;
+            font-size: 0.85rem;
+            margin-left: 4px;
+        }
+
+        .profile-section .comment-header .verified-icon {
+            color: #1DA1F2;
+            font-size: 0.8rem;
+        }
+
+        /* Delete buttons - same as blog page */
+        .profile-section .delete-status-btn,
+        .blog-post .delete-status-btn {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .profile-section .delete-status-btn:hover,
+        .blog-post .delete-status-btn:hover {
+            background: #fee;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .profile-section .delete-status-btn i,
+        .blog-post .delete-status-btn i {
+            color: #dc3545;
+        }
+
+        .profile-section .delete-comment-btn,
+        .blog-post .delete-comment-btn {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .profile-section .delete-comment-btn:hover,
+        .blog-post .delete-comment-btn:hover {
+            background: #fee;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .profile-section .delete-comment-btn i,
+        .blog-post .delete-comment-btn i {
+            color: #dc3545;
+        }
+
+        /* Loading spinner */
+        .empty-state .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Navbar logo styling */
+        .nav-brand a {
+            color: #2e7d32 !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-brand a:hover {
+            color: #1b5e20 !important;
+            transform: scale(1.05);
+        }
+
+        .nav-brand a i {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-brand a:hover i {
+            transform: rotate(-15deg) scale(1.1);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .profile-header {
+                padding: 30px 20px;
+            }
+
+            .profile-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 25px;
+            }
+
+            .profile-avatar-large {
+                width: 110px;
+                height: 110px;
+                font-size: 3rem;
+            }
+
+            .profile-name {
+                font-size: 1.8rem;
+            }
+
+            .profile-email {
+                font-size: 1rem;
+                justify-content: center;
+            }
+
+            .profile-stats {
+                justify-content: center;
+                gap: 15px;
+                width: 100%;
+            }
+
+            .stat-item-inline {
+                font-size: 0.9rem;
+            }
+
+            .profile-section {
+                padding: 25px 20px;
+            }
+
+            .section-header h2 {
+                font-size: 1.4rem;
+            }
+
+            .section-header i {
+                font-size: 1.4rem;
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-container {
+                padding: 20px 15px;
+            }
+
+            .profile-header {
+                padding: 25px 15px;
+            }
+
+            .profile-avatar-large {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .profile-name {
+                font-size: 1.5rem;
+            }
+
+            .stat-item-inline {
+                font-size: 0.85rem;
+            }
+
+            .profile-section {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" style="color: #2e7d32; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.5rem; transition: all 0.3s ease;">
+                    <i class="fas fa-book"></i>
+                    <span>Booksy</span>
+                </a>
+            </div>
+            
+            <div class="nav-links">
+                <div id="userProfile">
+                    <div class="user-profile" id="userProfileTrigger">
+                        <img id="userAvatar" src="" alt="User" class="user-avatar" style="display: none;">
+                        <span id="userName" class="user-name"></span>
+                        <!-- <i class="fas fa-chevron-down user-dropdown-icon"></i> -->
+                    </div>
+                    <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none;">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profil</span>
+                        </a>
+                        <a href="#" class="dropdown-item" onclick="logout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Çıxış</span>
+                        </a>
+                    </div>
+                </div>
+                <div id="loginSection">
+                    <button class="google-login-btn" onclick="loginWithGoogle()">
+                        <span>Google</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Content -->
+    <main class="main-content">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header" id="profileHeader">
+                <div class="profile-info">
+                    <div class="profile-avatar-large" id="profileAvatarLarge">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-details">
+                        <h1 class="profile-name" id="profileName">Yüklənir...</h1>
+                        <p class="profile-email" id="profileEmail"></p>
+                        <div class="profile-stats">
+                            <span class="stat-item-inline">
+                                <span class="stat-label">Paylaşım:</span>
+                                <span class="stat-value" id="totalStatuses">0</span>
+                            </span>
+                            <span class="stat-item-inline">
+                                <span class="stat-label">Şərh:</span>
+                                <span class="stat-value" id="totalComments">0</span>
+                            </span>
+                            <span class="stat-item-inline">
+                                <span class="stat-label">Bəyəni:</span>
+                                <span class="stat-value" id="totalLikes">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <!-- My Statuses -->
+                <div class="profile-section">
+                    <div class="section-header">
+                        <i class="fas fa-feather-alt"></i>
+                        <h2>Mənim Paylaşımlarım</h2>
+                    </div>
+                    <div id="myStatusesContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Yüklənir...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Comments -->
+                <div class="profile-section">
+                    <div class="section-header">
+                        <i class="fas fa-comments"></i>
+                        <h2>Mənim Şərhlərim</h2>
+                    </div>
+                    <div id="myCommentsContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Yüklənir...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 KitApp | Müəllif hüquqları qorunur.</p>
+                <a href="https://t.me/your_channel" target="_blank" class="telegram-link-footer">
+                    <i class="fab fa-telegram"></i>
+                    Telegram
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content confirm-modal">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 id="confirmTitle">Təsdiq tələb olunur</h3>
+            </div>
+            <div class="confirm-body">
+                <p id="confirmMessage">Bu əməliyyatı həyata keçirmək istədiyinizə əminsiniz?</p>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn btn-cancel-confirm" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                    <span>Ləğv et</span>
+                </button>
+                <button class="btn btn-confirm-delete" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i>
+                    <span>Sil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../script.js"></script>
+    <script>
+        // HTML escape function
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${month}/${day}/${year} ${hours}:${minutes}`;
+        }
+
+        // Get like count from localStorage
+        function getLikeCount(statusId) {
+            const liked = JSON.parse(localStorage.getItem('likedStatuses') || '[]');
+            const counts = JSON.parse(localStorage.getItem('likeCounts') || '{}');
+            return counts[statusId] || (liked.includes(statusId) ? 1 : 0);
+        }
+
+        let currentUser = null;
+
+        // Load user profile
+        async function loadUserProfile() {
+            try {
+                // Get current user
+                const authResponse = await fetch('/api/auth/user', {
+                    credentials: 'include'
+                });
+                
+                if (!authResponse.ok) {
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                const authData = await authResponse.json();
+                if (!authData.user) {
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                currentUser = authData.user;
+                
+                // Update profile header
+                const profileName = document.getElementById('profileName');
+                const profileEmail = document.getElementById('profileEmail');
+                const profileAvatarLarge = document.getElementById('profileAvatarLarge');
+
+                profileName.textContent = currentUser.name || currentUser.email || 'İstifadəçi';
+                profileEmail.textContent = currentUser.email || '';
+
+                if (currentUser.picture && currentUser.picture.trim() !== '') {
+                    const img = document.createElement('img');
+                    img.src = currentUser.picture;
+                    img.alt = currentUser.name || 'User';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                    };
+                    profileAvatarLarge.innerHTML = '';
+                    profileAvatarLarge.appendChild(img);
+                } else {
+                    profileAvatarLarge.innerHTML = '<i class="fas fa-user"></i>';
+                }
+
+                // Load user's statuses and comments
+                await loadUserStatuses();
+                await loadUserComments();
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                window.location.href = '../index.html';
+            }
+        }
+
+        // Load user's statuses
+        async function loadUserStatuses() {
+            try {
+                const response = await fetch('/api/statuses', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                const myStatuses = (data.statuses || []).filter(status => 
+                    status.author === currentUser.name || status.author === currentUser.email
+                );
+
+                const container = document.getElementById('myStatusesContainer');
+                document.getElementById('totalStatuses').textContent = myStatuses.length;
+
+                if (myStatuses.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-feather-alt"></i>
+                            <p>Hələ paylaşım yoxdur</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = myStatuses.map(status => {
+                    const date = formatDate(status.date);
+                    const escapedText = escapeHtml(status.text);
+                    const fullText = escapedText.replace(/\n/g, '<br>');
+                    
+                    // Estimate if text is longer than 4 lines (rough estimate: ~50 chars per line)
+                    const textLength = escapedText.length;
+                    const estimatedLines = Math.ceil(textLength / 50);
+                    const isLongText = estimatedLines > 4 || escapedText.split('\n').length > 4;
+                    
+                    const likeCount = getLikeCount(status.id);
+
+                    return `
+                        <div class="blog-post modern-card" style="margin-bottom: 20px;">
+                            <div class="blog-header">
+                                <div class="blog-author">
+                                    <div class="author-avatar">
+                                        ${currentUser.picture ? 
+                                            `<img src="${escapeHtml(currentUser.picture)}" alt="${escapeHtml(currentUser.name)}" class="author-avatar-img" onerror="this.style.display='none';">` : 
+                                            ''
+                                        }
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">
+                                            ${escapeHtml(status.author)}
+                                            ${status.authorVerified ? '<i class="fas fa-check-circle verified-icon" title="Təsdiqlənmiş hesab"></i>' : ''}
+                                        </span>
+                                        <span class="blog-date">${date}</span>
+                                    </div>
+                                    <button class="delete-status-btn" onclick="deleteStatus('${status.id}')" title="Statusu sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="blog-content-wrapper">
+                                <div class="blog-content ${isLongText ? '' : 'expanded'}" id="content-${status.id}">${fullText}</div>
+                                ${isLongText ? `
+                                <button class="expand-content-btn" onclick="toggleContent('${status.id}', this)" data-full-text="${fullText.replace(/"/g, '&quot;')}">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                ` : ''}
+                            </div>
+                            <div class="blog-footer">
+                                <div class="blog-stats">
+                                    <button class="action-btn like-button" onclick="window.location.href='../blog.html#status-${status.id}'">
+                                        <i class="far fa-heart"></i>
+                                        <span class="like-count">${likeCount}</span>
+                                    </button>
+                                    <button class="action-btn comment-btn" onclick="window.location.href='../blog.html#status-${status.id}'">
+                                        <i class="far fa-comment"></i>
+                                        <span class="comment-count">${(status.comments || []).length}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Setup avatar handlers
+                setTimeout(setupAvatarErrorHandlers, 100);
+            } catch (error) {
+                console.error('Error loading user statuses:', error);
+            }
+        }
+
+        // Load user's comments
+        async function loadUserComments() {
+            try {
+                const response = await fetch('/api/statuses', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                const allComments = [];
+                (data.statuses || []).forEach(status => {
+                    (status.comments || []).forEach(comment => {
+                        if (comment.author === currentUser.name || comment.author === currentUser.email) {
+                            allComments.push({
+                                ...comment,
+                                statusId: status.id,
+                                statusText: status.text.substring(0, 100) + '...'
+                            });
+                        }
+                    });
+                });
+
+                const container = document.getElementById('myCommentsContainer');
+                document.getElementById('totalComments').textContent = allComments.length;
+
+                // Calculate total likes
+                const totalLikes = (data.statuses || []).reduce((sum, status) => {
+                    return sum + getLikeCount(status.id);
+                }, 0);
+                document.getElementById('totalLikes').textContent = totalLikes;
+
+                if (allComments.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-comments"></i>
+                            <p>Hələ şərh yoxdur</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = allComments.map(comment => {
+                    const date = formatDate(comment.date);
+                    const text = escapeHtml(comment.text).replace(/\n/g, '<br>');
+
+                    return `
+                        <div class="comment-item" style="margin-bottom: 20px; padding: 15px; background: #fafafa; border-radius: 12px; border: 1px solid #e8e8e8;">
+                            <div class="comment-header" style="margin-bottom: 10px;">
+                                <span style="font-weight: 600; color: #2e7d32; display: inline-flex; align-items: center; gap: 6px;">
+                                    ${escapeHtml(comment.author)}
+                                    ${comment.authorVerified ? '<i class="fas fa-check-circle verified-icon" title="Təsdiqlənmiş hesab" style="color: #1DA1F2; font-size: 0.85rem;"></i>' : ''}
+                                </span>
+                                <span style="color: #999; font-size: 0.85rem; margin-left: 10px;">${date}</span>
+                                <button class="delete-comment-btn" onclick="deleteComment('${comment.statusId}', '${comment.id}')" title="Şərhi sil" style="margin-left: auto;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="comment-text" style="color: #555; margin-bottom: 10px;">${text}</div>
+                            <div style="padding-top: 10px; border-top: 1px solid #e8e8e8;">
+                                <a href="../blog.html#status-${comment.statusId}" style="color: #2e7d32; text-decoration: none; font-size: 0.9rem;">
+                                    <i class="fas fa-link"></i> Statusa get
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading user comments:', error);
+            }
+        }
+
+        // Confirmation modal functions
+        let confirmCallback = null;
+
+        function showConfirmModal(title, message, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            confirmCallback = onConfirm;
+            
+            // Remove existing listener
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            const newConfirmBtn = document.getElementById('confirmDeleteBtn');
+            
+            // Add new listener
+            newConfirmBtn.addEventListener('click', function() {
+                if (confirmCallback) {
+                    confirmCallback();
+                    closeConfirmModal();
+                }
+            });
+            
+            modal.classList.add('show');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
+            confirmCallback = null;
+        }
+
+        // Notification function (fallback if not available from script.js)
+        function showNotification(message, type = 'success') {
+            if (window.showNotification) {
+                window.showNotification(message, type);
+            } else {
+                alert(message);
+            }
+        }
+
+        // Delete status function
+        async function deleteStatus(statusId) {
+            showConfirmModal(
+                'Statusu sil',
+                'Bu statusu silmək istədiyinizə əminsiniz?',
+                async () => {
+                    try {
+                        const response = await fetch(`/api/statuses/${statusId}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            showNotification('Status uğurla silindi', 'success');
+                            loadUserStatuses();
+                            loadUserComments();
+                        } else {
+                            showNotification(data.error || 'Status silinərkən xəta baş verdi', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting status:', error);
+                        showNotification('Status silinərkən xəta baş verdi', 'error');
+                    }
+                }
+            );
+        }
+
+        // Delete comment function
+        async function deleteComment(statusId, commentId) {
+            showConfirmModal(
+                'Şərhi sil',
+                'Bu şərhi silmək istədiyinizə əminsiniz?',
+                async () => {
+                    try {
+                        const response = await fetch(`/api/statuses/${statusId}/comments/${commentId}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            showNotification('Şərh uğurla silindi', 'success');
+                            loadUserComments();
+                        } else {
+                            showNotification(data.error || 'Şərh silinərkən xəta baş verdi', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting comment:', error);
+                        showNotification('Şərh silinərkən xəta baş verdi', 'error');
+                    }
+                }
+            );
+        }
+
+        // Toggle content expand/collapse
+        function toggleContent(statusId, button) {
+            const contentDiv = document.getElementById(`content-${statusId}`);
+            if (!contentDiv) return;
+            
+            const isExpanded = button.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse - limit to 4 lines
+                contentDiv.classList.remove('expanded');
+                button.classList.remove('expanded');
+            } else {
+                // Expand - show full text
+                contentDiv.classList.add('expanded');
+                button.classList.add('expanded');
+            }
+        }
+
+        // Setup avatar error handlers
+        function setupAvatarErrorHandlers() {
+            document.querySelectorAll('.author-avatar-img').forEach(img => {
+                img.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    const icon = this.nextElementSibling;
+                    if (icon && icon.tagName === 'I') {
+                        icon.style.display = 'flex';
+                    }
+                });
+            });
+        }
+
+        // Make functions globally available
+        window.deleteStatus = deleteStatus;
+        window.deleteComment = deleteComment;
+        window.closeConfirmModal = closeConfirmModal;
+        window.toggleContent = toggleContent;
+
+        // Close confirmation modal on outside click
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmModal = document.getElementById('confirmModal');
+            if (confirmModal) {
+                confirmModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeConfirmModal();
+                    }
+                });
+            }
+        });
+
+        // Load profile on page load
+        loadUserProfile();
+    </script>
+</body>
+</html>
+

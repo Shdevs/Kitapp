@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ban Edildiniz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #dc3545;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .ban-container {
+            max-width: 600px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .ban-icon {
+            font-size: 120px;
+            margin-bottom: 30px;
+            animation: shake 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(-5px);
+            }
+            100% {
+                transform: translateX(5px);
+            }
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .ban-message {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .ban-details {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border-left: 4px solid #ffffff;
+        }
+
+        .ban-details p {
+            margin-bottom: 10px;
+        }
+
+        .ban-details p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="ban-container">
+        <div class="ban-icon">🚫</div>
+        <h1>BANLANDINIZ</h1>
+        <div class="ban-message">
+            Hesabınız admin tərəfindən ban edilmişdir.
+        </div>
+        <div class="ban-details">
+            <p><strong>Nə üçün ban edildiniz?</strong></p>
+            <p>Hesabınız saytın qaydalarını pozduğuna görə admin tərəfindən ban edilmişdir.</p>
+            <p style="margin-top: 15px;"><strong>Nə edə bilərsiniz?</strong></p>
+            <p>Bu qərarın götürülməsi üçün admin ilə əlaqə saxlamalısınız.</p>
+        </div>
+    </div>
+
+    <script>
+        // Check ban status periodically
+        async function checkBanStatus() {
+            try {
+                const response = await fetch('/api/auth/user', {
+                    credentials: 'include',
+                    cache: 'no-cache'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // If user is no longer banned, logout and redirect
+                    if (!data.banned && (!data.user || !data.user.banned)) {
+                        console.log('Ban removed, logging out and redirecting...');
+                        
+                        // Logout
+                        try {
+                            await fetch('/api/auth/logout', {
+                                method: 'POST',
+                                credentials: 'include'
+                            });
+                        } catch (logoutError) {
+                            console.error('Logout error:', logoutError);
+                        }
+                        
+                        // Redirect to home page
+                        window.location.replace('/');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking ban status:', error);
+            }
+        }
+
+        // Check ban status every 2 seconds
+        setInterval(checkBanStatus, 2000);
+        
+        // Also check immediately on page load (including F5 refresh)
+        checkBanStatus();
+        
+        // Also check when page becomes visible again (if user switches tabs)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                checkBanStatus();
+            }
+        });
+    </script>
+</body>
+</html>
+
